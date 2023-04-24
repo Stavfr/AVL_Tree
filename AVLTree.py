@@ -32,7 +32,7 @@ class AVLNode(object):
 	@returns: the key of self, None if the node is virtual
 	"""
 	def get_key(self):
-		return None
+		return self.key
 
 
 	"""returns the value
@@ -41,7 +41,7 @@ class AVLNode(object):
 	@returns: the value of self, None if the node is virtual
 	"""
 	def get_value(self):
-		return None
+		return self.value
 
 
 	"""returns the left child
@@ -49,7 +49,7 @@ class AVLNode(object):
 	@returns: the left child of self, None if there is no left child (if self is virtual)
 	"""
 	def get_left(self):
-		return None
+		return self.left
 
 
 	"""returns the right child
@@ -58,7 +58,7 @@ class AVLNode(object):
 	@returns: the right child of self, None if there is no right child (if self is virtual)
 	"""
 	def get_right(self):
-		return None
+		return self.right
 
 
 	"""returns the parent 
@@ -67,7 +67,7 @@ class AVLNode(object):
 	@returns: the parent of self, None if there is no parent
 	"""
 	def get_parent(self):
-		return None
+		return self.parent
 
 
 	"""returns the height
@@ -76,7 +76,7 @@ class AVLNode(object):
 	@returns: the height of self, -1 if the node is virtual
 	"""
 	def get_height(self):
-		return -1
+		return self.height
 
 
 	"""returns the size of the subtree
@@ -85,7 +85,7 @@ class AVLNode(object):
 	@returns: the size of the subtree of self, 0 if the node is virtual
 	"""
 	def get_size(self):
-		return 0
+		return self.height
 
 
 	"""sets key
@@ -94,7 +94,8 @@ class AVLNode(object):
 	@param key: key
 	"""
 	def set_key(self, key):
-		return None
+		# TODO: What is this?
+		self.key = key
 
 
 	"""sets value
@@ -103,7 +104,7 @@ class AVLNode(object):
 	@param value: data
 	"""
 	def set_value(self, value):
-		return None
+		self.value = value
 
 
 	"""sets left child
@@ -112,7 +113,9 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_left(self, node):
-		return None
+		self.left = node
+		node.set_parent(self)
+		
 
 
 	"""sets right child
@@ -121,7 +124,8 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_right(self, node):
-		return None
+		self.right = node
+		node.set_parent(self)
 
 
 	"""sets parent
@@ -130,7 +134,17 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_parent(self, node):
-		return None
+		new_parent : AVLNode = node
+		self.parent = new_parent
+
+		parent_left = new_parent.left
+		parent_right = new_parent.right
+
+		new_height = max(parent_left.height, parent_right.height) + 1
+		new_parent.set_height(new_height)
+
+		new_size = parent_left.height + parent_right.height + 1
+		new_parent.set_size(new_size)
 
 
 	"""sets the height of the node
@@ -139,7 +153,7 @@ class AVLNode(object):
 	@param h: the height
 	"""
 	def set_height(self, h):
-		return None
+		self.height = h
 
 
 	"""sets the size of node
@@ -148,7 +162,7 @@ class AVLNode(object):
 	@param s: the size
 	"""
 	def set_size(self, s):
-		return None
+		self.size = s
 
 
 	"""returns whether self is not a virtual node 
@@ -157,7 +171,7 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return False
+		return not self.key == None
 
 
 
@@ -174,6 +188,20 @@ class AVLTree(object):
 	def __init__(self):
 		self.root = None
 		# add your fields here
+
+
+	def rotate_right(self, old_root : AVLNode):
+		new_root : AVLNode = old_root.get_left()
+		new_root_right = new_root.get_right()
+		old_root.set_left(new_root_right)
+		new_root.set_right = old_root
+	
+
+	def rotate_left(self, old_root :AVLNode):
+		new_root : AVLNode = old_root.get_right()
+		new_root_left = new_root.get_left()
+		old_root.set_right(new_root_left)
+		new_root.set_left = old_root
 
 
 
