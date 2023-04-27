@@ -26,6 +26,25 @@ class AVLNode(object):
         self.height = -1
         self.size = 0
 
+    def create_leaf_with_virtual_nodes(self, key, value):
+        leaf = AVLNode(key, value)
+        leaf.set_height(0)
+        leaf.set_size(1)
+        leaf.set_left(AVLNode(None, None))
+        leaf.set_right(AVLNode(None, None))
+
+        return leaf
+
+    def compute_balance_factor(self):
+        if self == None or (not self.is_real_node()):
+            return 0
+
+        right_child_height = self.get_right().get_height()
+        left_child_height = self.get_left().get_height()
+        balance_factor = left_child_height - right_child_height
+
+        return balance_factor
+
     """returns the key
 
 	@rtype: int or None
@@ -223,6 +242,17 @@ class AVLTree(object):
 	"""
 
     def search(self, key):
+        root = self.root
+
+        while root != None and root.is_real_node():
+            root_key = root.get_key()
+            if root_key == key:
+                return root
+            if root_key < key:
+                root = root.get_left()
+            if root_key > key:
+                root = root.get_right()
+
         return None
 
     """inserts val at position i in the dictionary
@@ -236,8 +266,68 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 
+    def find_parent_for_insert(self, key):
+        root: AVLNode = self.root
+
+        while root.is_real_node():
+            root_key = root.get_key()
+
+            if root_key < key:
+                root = root.get_left()
+            if root_key > key:
+                root = root.get_right()
+
+        return root.get_parent()
+
+    def physical_insert(self, leaf_for_insert: AVLNode):
+        key = leaf_for_insert.get_key()
+        parent_for_insert = self.find_parent_for_insert(key)
+        parent_for_insert_key = parent_for_insert.get_key()
+
+        if parent_for_insert_key > key:
+            parent_for_insert.set_left(leaf_for_insert)
+        if parent_for_insert_key < key:
+            parent_for_insert.set_right(leaf_for_insert)
+
+        return parent_for_insert
+
+    def find_parent_with_illegal_balance_factor(self, node: AVLNode):
+        while abs(node.compute_balance_factor()) <= 1:
+            node = node.parent
+        return node
+
+    def fix_tree_of_illegal_root(self, illegal_root: AVLNode):
+        illegal_balance_factor = illegal_root.compute_balance_factor()
+
+        if illegal_balance_factor == -2:
+            if illegal_root.get_right().compute_balance_factor() == -1:
+                self.rotate_left(illegal_root)
+                return 1
+            if illegal_root.get_right().compute_balance_factor() == 1:
+                self.rotate_right_then_left(illegal_root)
+                return 2
+        else:  # illegal_balance_factor == 2
+            if illegal_root.get_left().compute_balance_factor() == 1:
+                self.rotate_right(illegal_root)
+                return 1
+            if illegal_root.get_left().compute_balance_factor() == -1:
+                self.rotate_left_then_right(illegal_root)
+                return 2
+
     def insert(self, key, val):
-        return -1
+        leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
+
+        if self.root == None:
+            self.root = leaf_for_insert
+
+        parent_of_leaf = self.physical_insert(leaf_for_insert)
+        node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
+            parent_of_leaf)
+
+        balance_moves = self.fix_tree_of_illegal_root(
+            node_with_illegal_balance_factor)
+
+        return balance_moves
 
     """deletes node from the dictionary
 
