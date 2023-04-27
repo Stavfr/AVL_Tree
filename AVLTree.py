@@ -1,222 +1,231 @@
-#username - complete info
-#id1      - complete info 
-#name1    - complete info 
-#id2      - complete info
-#name2    - complete info  
-
+# username - complete info
+# id1      - complete info
+# name1    - complete info
+# id2      - complete info
+# name2    - complete info
 
 
 """A class represnting a node in an AVL tree"""
 
-class AVLNode(object):
-	"""Constructor, you are allowed to add more fields. 
-	
-	@type key: int or None
-	@param key: key of your node
-	@type value: any
-	@param value: data of your node
-	"""
-	def __init__(self, key, value):
-		self.key = key
-		self.value = value
-		self.left = None
-		self.right = None
-		self.parent = None
-		self.height = -1
-		self.size = 0
-		
 
-	"""returns the key
+class AVLNode(object):
+    """Constructor, you are allowed to add more fields.
+
+    @type key: int or None
+    @param key: key of your node
+    @type value: any
+    @param value: data of your node
+    """
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.left = None
+        self.right = None
+        self.parent = None
+        self.height = -1
+        self.size = 0
+
+    """returns the key
 
 	@rtype: int or None
 	@returns: the key of self, None if the node is virtual
 	"""
-	def get_key(self):
-		return self.key
 
+    def get_key(self):
+        return self.key
 
-	"""returns the value
+    """returns the value
 
 	@rtype: any
 	@returns: the value of self, None if the node is virtual
 	"""
-	def get_value(self):
-		return self.value
 
+    def get_value(self):
+        return self.value
 
-	"""returns the left child
+    """returns the left child
 	@rtype: AVLNode
 	@returns: the left child of self, None if there is no left child (if self is virtual)
 	"""
-	def get_left(self):
-		return self.left
 
+    def get_left(self):
+        return self.left
 
-	"""returns the right child
+    """returns the right child
 
 	@rtype: AVLNode
 	@returns: the right child of self, None if there is no right child (if self is virtual)
 	"""
-	def get_right(self):
-		return self.right
 
+    def get_right(self):
+        return self.right
 
-	"""returns the parent 
+    """returns the parent
 
 	@rtype: AVLNode
 	@returns: the parent of self, None if there is no parent
 	"""
-	def get_parent(self):
-		return self.parent
 
+    def get_parent(self):
+        return self.parent
 
-	"""returns the height
+    """returns the height
 
 	@rtype: int
 	@returns: the height of self, -1 if the node is virtual
 	"""
-	def get_height(self):
-		return self.height
 
+    def get_height(self):
+        return self.height
 
-	"""returns the size of the subtree
+    """returns the size of the subtree
 
 	@rtype: int
 	@returns: the size of the subtree of self, 0 if the node is virtual
 	"""
-	def get_size(self):
-		return self.height
 
+    def get_size(self):
+        return self.height
 
-	"""sets key
+    """sets key
 
 	@type key: int or None
 	@param key: key
 	"""
-	def set_key(self, key):
-		# TODO: What is this?
-		self.key = key
 
+    def set_key(self, key):
+        # TODO: What is this?
+        self.key = key
 
-	"""sets value
+    """sets value
 
 	@type value: any
 	@param value: data
 	"""
-	def set_value(self, value):
-		self.value = value
 
+    def set_value(self, value):
+        self.value = value
 
-	"""sets left child
-
-	@type node: AVLNode
-	@param node: a node
-	"""
-	def set_left(self, node):
-		self.left = node
-		node.set_parent(self)
-		
-
-
-	"""sets right child
+    """sets left child
 
 	@type node: AVLNode
 	@param node: a node
 	"""
-	def set_right(self, node):
-		self.right = node
-		node.set_parent(self)
 
+    def set_left(self, node):
+        self.left = node
+        node.set_parent(self)
 
-	"""sets parent
+    """sets right child
 
 	@type node: AVLNode
 	@param node: a node
 	"""
-	def set_parent(self, node):
-		new_parent : AVLNode = node
-		self.parent = new_parent
 
-		parent_left = new_parent.left
-		parent_right = new_parent.right
+    def set_right(self, node):
+        self.right = node
+        node.set_parent(self)
 
-		new_height = max(parent_left.height, parent_right.height) + 1
-		new_parent.set_height(new_height)
+    """sets parent
 
-		new_size = parent_left.height + parent_right.height + 1
-		new_parent.set_size(new_size)
+	@type node: AVLNode
+	@param node: a node
+	"""
 
+    def set_parent(self, node):
+        new_parent: AVLNode = node
+        self.parent = new_parent
 
-	"""sets the height of the node
+        parent_left = new_parent.left
+        parent_right = new_parent.right
+
+        new_height = max(parent_left.height, parent_right.height) + 1
+        new_parent.set_height(new_height)
+
+        new_size = parent_left.height + parent_right.height + 1
+        new_parent.set_size(new_size)
+
+    """sets the height of the node
 
 	@type h: int
 	@param h: the height
 	"""
-	def set_height(self, h):
-		self.height = h
 
+    def set_height(self, h):
+        self.height = h
 
-	"""sets the size of node
+    """sets the size of node
 
 	@type s: int
 	@param s: the size
 	"""
-	def set_size(self, s):
-		self.size = s
 
+    def set_size(self, s):
+        self.size = s
 
-	"""returns whether self is not a virtual node 
+    """returns whether self is not a virtual node
 
 	@rtype: bool
 	@returns: False if self is a virtual node, True otherwise.
 	"""
-	def is_real_node(self):
-		return not self.key == None
 
+    def is_real_node(self):
+        return not self.key == None
 
 
 """
 A class implementing an AVL tree.
 """
 
+
 class AVLTree(object):
 
-	"""
-	Constructor, you are allowed to add more fields.  
+    """
+    Constructor, you are allowed to add more fields.
 
-	"""
-	def __init__(self):
-		self.root = None
-		# add your fields here
+    """
 
+    def __init__(self):
+        self.root = None
+        # add your fields here
 
-	def rotate_right(self, old_root : AVLNode):
-		new_root : AVLNode = old_root.get_left()
-		new_root_right = new_root.get_right()
-		old_root.set_left(new_root_right)
-		new_root.set_right = old_root
-	
+    def rotate_right(self, old_root: AVLNode):
+        new_root: AVLNode = old_root.get_left()
+        new_root_right = new_root.get_right()
+        old_root.set_left(new_root_right)
+        new_root.set_right = old_root
 
-	def rotate_left(self, old_root :AVLNode):
-		new_root : AVLNode = old_root.get_right()
-		new_root_left = new_root.get_left()
-		old_root.set_right(new_root_left)
-		new_root.set_left = old_root
+    def rotate_left(self, old_root: AVLNode):
+        new_root: AVLNode = old_root.get_right()
+        new_root_left = new_root.get_left()
+        old_root.set_right(new_root_left)
+        new_root.set_left = old_root
 
+    def rotate_left_then_right(self, old_root: AVLNode):
+        # Stands for A in the presentation
+        left_old_new_root: AVLNode = old_root.get_left()
 
+        self.rotate_left(left_old_new_root)
+        self.rotate_right(old_root)
 
-	"""searches for a value in the dictionary corresponding to the key
+    def rotate_right_then_left(self, old_root: AVLNode):
+        right_old_new_root: AVLNode = old_root.get_right()
+        self.rotate_right(right_old_new_root)
+        self.rotate_left(old_root)
+
+    """searches for a value in the dictionary corresponding to the key
 
 	@type key: int
 	@param key: a key to be searched
 	@rtype: any
 	@returns: the value corresponding to key.
 	"""
-	def search(self, key):
-		return None
 
+    def search(self, key):
+        return None
 
-	"""inserts val at position i in the dictionary
+    """inserts val at position i in the dictionary
 
 	@type key: int
 	@pre: key currently does not appear in the dictionary
@@ -226,40 +235,40 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def insert(self, key, val):
-		return -1
 
+    def insert(self, key, val):
+        return -1
 
-	"""deletes node from the dictionary
+    """deletes node from the dictionary
 
 	@type node: AVLNode
 	@pre: node is a real pointer to a node in self
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, node):
-		return -1
 
+    def delete(self, node):
+        return -1
 
-	"""returns an array representing dictionary 
+    """returns an array representing dictionary 
 
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
-	def avl_to_array(self):
-		return None
 
+    def avl_to_array(self):
+        return None
 
-	"""returns the number of items in dictionary 
+    """returns the number of items in dictionary 
 
 	@rtype: int
 	@returns: the number of items in dictionary 
 	"""
-	def size(self):
-		return self.get_root().get_size()	
 
-	
-	"""splits the dictionary at a given node
+    def size(self):
+        return self.get_root().get_size()
+
+    """splits the dictionary at a given node
 
 	@type node: AVLNode
 	@pre: node is in self
@@ -269,11 +278,11 @@ class AVLTree(object):
 	dictionary smaller than node.key, right is an AVLTree representing the keys in the 
 	dictionary larger than node.key.
 	"""
-	def split(self, node):
-		return None
 
-	
-	"""joins self with key and another AVLTree
+    def split(self, node):
+        return None
+
+    """joins self with key and another AVLTree
 
 	@type tree: AVLTree 
 	@param tree: a dictionary to be joined with self
@@ -286,11 +295,11 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
-	def join(self, tree, key, val):
-		return None
 
+    def join(self, tree, key, val):
+        return None
 
-	"""compute the rank of node in the self
+    """compute the rank of node in the self
 
 	@type node: AVLNode
 	@pre: node is in self
@@ -298,11 +307,11 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the rank of node in self
 	"""
-	def rank(self, node):
-		return None
 
+    def rank(self, node):
+        return None
 
-	"""finds the i'th smallest item (according to keys) in self
+    """finds the i'th smallest item (according to keys) in self
 
 	@type i: int
 	@pre: 1 <= i <= self.size()
@@ -310,14 +319,15 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the item of rank i in self
 	"""
-	def select(self, i):
-		return None
 
+    def select(self, i):
+        return None
 
-	"""returns the root of the tree representing the dictionary
+    """returns the root of the tree representing the dictionary
 
 	@rtype: AVLNode
 	@returns: the root, None if the dictionary is empty
 	"""
-	def get_root(self):
-		return None
+
+    def get_root(self):
+        return None
