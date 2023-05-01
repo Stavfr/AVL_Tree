@@ -4,6 +4,79 @@
 # id2      - complete info
 # name2    - complete info
 
+def printree(t, bykey=True):
+    """Print a textual representation of t
+    bykey=True: show keys instead of values"""
+    # for row in trepr(t, bykey):
+    #        print(row)
+    return trepr(t, bykey)
+
+
+def trepr(t, bykey=False):
+    """Return a list of textual representations of the levels in t
+    bykey=True: show keys instead of values"""
+    if t == None:
+        return ["#"]
+
+    thistr = str(t.key) if bykey else str(t.val)
+
+    return conc(trepr(t.left, bykey), thistr, trepr(t.right, bykey))
+
+
+def conc(left, root, right):
+    """Return a concatenation of textual represantations of
+    a root node, its left node, and its right node
+    root is a string, and left and right are lists of strings"""
+
+    lwid = len(left[-1])
+    rwid = len(right[-1])
+    rootwid = len(root)
+
+    result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
+
+    ls = leftspace(left[0])
+    rs = rightspace(right[0])
+    result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid *
+                  " " + "\\" + rs * "_" + (rwid - rs) * " ")
+
+    for i in range(max(len(left), len(right))):
+        row = ""
+        if i < len(left):
+            row += left[i]
+        else:
+            row += lwid * " "
+
+        row += (rootwid + 2) * " "
+
+        if i < len(right):
+            row += right[i]
+        else:
+            row += rwid * " "
+
+        result.append(row)
+
+    return result
+
+
+def leftspace(row):
+    """helper for conc"""
+    # row is the first row of a left node
+    # returns the index of where the second whitespace starts
+    i = len(row) - 1
+    while row[i] == " ":
+        i -= 1
+    return i + 1
+
+
+def rightspace(row):
+    """helper for conc"""
+    # row is the first row of a right node
+    # returns the index of where the first whitespace ends
+    i = 0
+    while row[i] == " ":
+        i += 1
+    return i
+
 
 """A class represnting a node in an AVL tree"""
 
@@ -17,6 +90,9 @@ class AVLNode(object):
     @param value: data of your node
     """
     # O(1)
+
+    def __repr__(self):
+        return "{}".format(self.key)
 
     def __init__(self, key, value):
         self.key = key
@@ -828,3 +904,12 @@ class AVLTree(object):
     # O(1)
     def get_root(self):
         return self.root
+<<<<<<< HEAD
+=======
+
+    def __repr__(self):  # no need to understand the implementation of this one
+        out = ""
+        for row in printree(self.root):  # need printree.py file
+            out = out + row + "\n"
+        return out
+>>>>>>> e4a6ec3 (Added tests)
