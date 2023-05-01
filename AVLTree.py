@@ -43,7 +43,35 @@ class AVLNode(object):
         left_child_height = self.get_left().get_height()
         balance_factor = left_child_height - right_child_height
 
+        self.height = max(right_child_height, left_child_height) + 1
+
         return balance_factor
+
+    def is_empty_node(self, node):
+        return node == None or (not node.is_real_node())
+
+    def is_leaf(self):
+        right_child = self.get_right()
+        left_child = self.get_left()
+
+        is_right_child_empty = self.is_empty_node(right_child)
+        is_left_child_empty = self.is_empty_node(left_child)
+
+        return is_right_child_empty and is_left_child_empty
+
+    def has_one_child(self):
+        right_child = self.get_right()
+        left_child = self.get_left()
+
+        is_right_child_empty = self.is_empty_node(right_child)
+        is_left_child_empty = self.is_empty_node(left_child)
+
+        return (is_right_child_empty and (not is_left_child_empty)) or \
+            (is_left_child_empty and (not is_right_child_empty))
+
+    def is_left_child_of_parent(self, node):
+        parent = node.parent
+        return parent.get_left() == node
 
     """returns the key
 
@@ -233,6 +261,12 @@ class AVLTree(object):
         self.rotate_right(right_old_new_root)
         self.rotate_left(old_root)
 
+    def find_successor_for_node_with_two_childs(self, node: AVLNode):
+        successor_contestant: AVLNode = node.get_right()
+        while not successor_contestant.get_left().is_empty_node(successor_contestant):
+            successor_contestant = successor_contestant.get_left()
+        return successor_contestant.get_parent()
+
     """searches for a value in the dictionary corresponding to the key
 
 	@type key: int
@@ -279,6 +313,34 @@ class AVLTree(object):
 
         return root.get_parent()
 
+    def find_parent_with_illegal_balance_factor(self, node: AVLNode):
+        while node != None and abs(node.compute_balance_factor()) <= 1:
+            node = node.parent
+        return node
+
+    def fix_tree_of_illegal_root(self, illegal_root):
+        if illegal_root == None:
+            return 0
+
+        illegal_balance_factor = illegal_root.compute_balance_factor()
+
+        if illegal_balance_factor == -2:
+            right_child_balance_factor = illegal_root.get_right().compute_balance_factor()
+            if right_child_balance_factor in [-1, 0]:
+                self.rotate_left(illegal_root)
+                return 1
+            if right_child_balance_factor == 1:
+                self.rotate_right_then_left(illegal_root)
+                return 2
+        else:  # illegal_balance_factor == 2
+            left_child_balance_factor = illegal_root.get_left().compute_balance_factor()
+            if left_child_balance_factor in [1, 0]:
+                self.rotate_right(illegal_root)
+                return 1
+            if left_child_balance_factor == -1:
+                self.rotate_left_then_right(illegal_root)
+                return 2
+
     def physical_insert(self, leaf_for_insert: AVLNode):
         key = leaf_for_insert.get_key()
         parent_for_insert = self.find_parent_for_insert(key)
@@ -290,29 +352,6 @@ class AVLTree(object):
             parent_for_insert.set_right(leaf_for_insert)
 
         return parent_for_insert
-
-    def find_parent_with_illegal_balance_factor(self, node: AVLNode):
-        while abs(node.compute_balance_factor()) <= 1:
-            node = node.parent
-        return node
-
-    def fix_tree_of_illegal_root(self, illegal_root: AVLNode):
-        illegal_balance_factor = illegal_root.compute_balance_factor()
-
-        if illegal_balance_factor == -2:
-            if illegal_root.get_right().compute_balance_factor() == -1:
-                self.rotate_left(illegal_root)
-                return 1
-            if illegal_root.get_right().compute_balance_factor() == 1:
-                self.rotate_right_then_left(illegal_root)
-                return 2
-        else:  # illegal_balance_factor == 2
-            if illegal_root.get_left().compute_balance_factor() == 1:
-                self.rotate_right(illegal_root)
-                return 1
-            if illegal_root.get_left().compute_balance_factor() == -1:
-                self.rotate_left_then_right(illegal_root)
-                return 2
 
     def insert(self, key, val):
         leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
@@ -337,8 +376,58 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 
-    def delete(self, node):
-        return -1
+    def physical_delete(self, node: AVLNode):
+        child = None
+        left_child = node.get_left()
+        if left_child.is_real_node():
+            child = left_child
+        else:
+            child = node.get_right()
+
+        node_parent = node.parent
+        if node_parent == None:
+            if child.is_real_node():
+                self.root = child
+            else:
+                self.root = None
+        else:
+            if node.is_left_child_of_parent():
+                node_parent.set_left(child)
+            else:
+                node_parent.set_right(child)
+            node.parent = None
+
+        return node_parent
+
+    def replace_node_in_tree(self, new_node: AVLNode, old_node: AVLNode):
+        if self.root == old_node:
+            self.root = new_node
+
+        new_node.set_left(old_node.get_left())
+        new_node.set_right(old_node.get_right())
+        new_node.parent = old_node.parent
+
+    def delete(self, node: AVLNode):
+        node_to_fix_from = None
+
+        if node.is_leaf() or node.has_one_child():
+            node_to_fix_from = self.physical_delete(node)
+        else:
+            successor = self.find_successor_for_node_with_two_childs(node)
+            node_to_fix_from = self.physical_delete(successor)
+            self.replace_node_in_tree(successor, node)
+
+        sum = 0
+        node_with_illegal_balance_factor = node_to_fix_from
+
+        while node_with_illegal_balance_factor != None:
+            node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
+                node_to_fix_from)
+
+            sum += self.fix_tree_of_illegal_root(
+                node_with_illegal_balance_factor)
+
+        return sum
 
     """returns an array representing dictionary 
 
