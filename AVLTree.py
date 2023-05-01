@@ -26,12 +26,14 @@ class AVLNode(object):
         self.height = -1
         self.size = 0
 
-    def create_leaf_with_virtual_nodes(self, key, value):
+    def create_leaf_with_virtual_nodes(key, value):
         leaf = AVLNode(key, value)
         leaf.set_height(0)
         leaf.set_size(1)
-        leaf.set_left(AVLNode(None, None))
-        leaf.set_right(AVLNode(None, None))
+        leaf.left = AVLNode(None, None)
+        leaf.left.parent = leaf
+        leaf.right = AVLNode(None, None)
+        leaf.right.parent = leaf
 
         return leaf
 
@@ -45,9 +47,14 @@ class AVLNode(object):
 
         self.height = max(right_child_height, left_child_height) + 1
 
+        right_child_size = self.get_right().get_size()
+        left_child_size = self.get_left().get_size()
+
+        self.size = right_child_size + left_child_size + 1
+
         return balance_factor
 
-    def is_empty_node(self, node):
+    def is_empty_node(node):
         return node == None or (not node.is_real_node())
 
     def is_leaf(self):
@@ -69,9 +76,15 @@ class AVLNode(object):
         return (is_right_child_empty and (not is_left_child_empty)) or \
             (is_left_child_empty and (not is_right_child_empty))
 
-    def is_left_child_of_parent(self, node):
-        parent = node.parent
+    def is_left_child_of_parent(node):
+        parent = node.get_parent()
         return parent.get_left() == node
+
+    def update_parents_child(self, old_child, new_child):
+        if AVLNode.is_left_child_of_parent(old_child):
+            self.set_left(new_child)
+        else:
+            self.set_right(new_child)
 
     """returns the key
 
@@ -133,7 +146,7 @@ class AVLNode(object):
 	"""
 
     def get_size(self):
-        return self.height
+        return self.size
 
     """sets key
 
@@ -181,17 +194,21 @@ class AVLNode(object):
 	"""
 
     def set_parent(self, node):
-        new_parent: AVLNode = node
-        self.parent = new_parent
+        if node == None:
+            self.parent = None
+        else:
+            new_parent: AVLNode = node
+            self.parent = new_parent
 
-        parent_left = new_parent.left
-        parent_right = new_parent.right
+            parent_left = new_parent.left
+            parent_right = new_parent.right
 
-        new_height = max(parent_left.height, parent_right.height) + 1
-        new_parent.set_height(new_height)
+            new_height = max(parent_left.get_height(),
+                             parent_right.get_height()) + 1
+            new_parent.set_height(new_height)
 
-        new_size = parent_left.height + parent_right.height + 1
-        new_parent.set_size(new_size)
+            new_size = parent_left.get_size() + parent_right.get_size() + 1
+            new_parent.set_size(new_size)
 
     """sets the height of the node
 
@@ -237,17 +254,37 @@ class AVLTree(object):
         self.root = None
         # add your fields here
 
+    def set_root(self, node):
+        self.root = node
+        node.set_parent(None)
+
     def rotate_right(self, old_root: AVLNode):
+        print("Rotating right")
         new_root: AVLNode = old_root.get_left()
         new_root_right = new_root.get_right()
+
+        old_root_parent = old_root.get_parent()
+        if old_root_parent != None:
+            old_root_parent.update_parents_child(old_root, new_root)
+        else:
+            self.set_root(new_root)
+
         old_root.set_left(new_root_right)
-        new_root.set_right = old_root
+        new_root.set_right(old_root)
 
     def rotate_left(self, old_root: AVLNode):
+        print("Rotating left")
         new_root: AVLNode = old_root.get_right()
         new_root_left = new_root.get_left()
+
+        old_root_parent = old_root.get_parent()
+        if old_root_parent != None:
+            old_root_parent.update_parents_child(old_root, new_root)
+        else:
+            self.set_root(new_root)
+
         old_root.set_right(new_root_left)
-        new_root.set_left = old_root
+        new_root.set_left(old_root)
 
     def rotate_left_then_right(self, old_root: AVLNode):
         # Stands for A in the presentation
@@ -263,7 +300,7 @@ class AVLTree(object):
 
     def find_successor_for_node_with_two_childs(self, node: AVLNode):
         successor_contestant: AVLNode = node.get_right()
-        while not successor_contestant.get_left().is_empty_node(successor_contestant):
+        while not successor_contestant.is_empty_node(successor_contestant):
             successor_contestant = successor_contestant.get_left()
         return successor_contestant.get_parent()
 
@@ -283,9 +320,9 @@ class AVLTree(object):
             if root_key == key:
                 return root
             if root_key < key:
-                root = root.get_left()
-            if root_key > key:
                 root = root.get_right()
+            if root_key > key:
+                root = root.get_left()
 
         return None
 
@@ -307,15 +344,15 @@ class AVLTree(object):
             root_key = root.get_key()
 
             if root_key < key:
-                root = root.get_left()
-            if root_key > key:
                 root = root.get_right()
+            if root_key > key:
+                root = root.get_left()
 
         return root.get_parent()
 
     def find_parent_with_illegal_balance_factor(self, node: AVLNode):
         while node != None and abs(node.compute_balance_factor()) <= 1:
-            node = node.parent
+            node = node.get_parent()
         return node
 
     def fix_tree_of_illegal_root(self, illegal_root):
@@ -341,6 +378,19 @@ class AVLTree(object):
                 self.rotate_left_then_right(illegal_root)
                 return 2
 
+    def fix_tree(self, node_with_illegal_balance_factor):
+        # When called 'node_with_illegal_balance_factor' is not necessarily illegal but it helps us for iterating using while
+        sum = 0
+
+        while node_with_illegal_balance_factor != None:
+            node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
+                node_with_illegal_balance_factor)
+
+            sum += self.fix_tree_of_illegal_root(
+                node_with_illegal_balance_factor)
+
+        return sum
+
     def physical_insert(self, leaf_for_insert: AVLNode):
         key = leaf_for_insert.get_key()
         parent_for_insert = self.find_parent_for_insert(key)
@@ -357,16 +407,12 @@ class AVLTree(object):
         leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
 
         if self.root == None:
-            self.root = leaf_for_insert
+            self.set_root(leaf_for_insert)
+            return 0
 
         parent_of_leaf = self.physical_insert(leaf_for_insert)
-        node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
-            parent_of_leaf)
 
-        balance_moves = self.fix_tree_of_illegal_root(
-            node_with_illegal_balance_factor)
-
-        return balance_moves
+        return self.fix_tree(parent_of_leaf)
 
     """deletes node from the dictionary
 
@@ -387,7 +433,7 @@ class AVLTree(object):
         node_parent = node.parent
         if node_parent == None:
             if child.is_real_node():
-                self.root = child
+                self.set_root(child)
             else:
                 self.root = None
         else:
@@ -399,13 +445,14 @@ class AVLTree(object):
 
         return node_parent
 
-    def replace_node_in_tree(self, new_node: AVLNode, old_node: AVLNode):
+    def replace_node_in_tree(self, old_node: AVLNode, new_node: AVLNode):
         if self.root == old_node:
-            self.root = new_node
+            self.set_root(new_node)
 
+        old_node_parent = old_node.get_parent()
         new_node.set_left(old_node.get_left())
         new_node.set_right(old_node.get_right())
-        new_node.parent = old_node.parent
+        old_node_parent.update_parents_child(old_node, new_node)
 
     def delete(self, node: AVLNode):
         node_to_fix_from = None
@@ -415,19 +462,9 @@ class AVLTree(object):
         else:
             successor = self.find_successor_for_node_with_two_childs(node)
             node_to_fix_from = self.physical_delete(successor)
-            self.replace_node_in_tree(successor, node)
+            self.replace_node_in_tree(node, successor)
 
-        sum = 0
-        node_with_illegal_balance_factor = node_to_fix_from
-
-        while node_with_illegal_balance_factor != None:
-            node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
-                node_to_fix_from)
-
-            sum += self.fix_tree_of_illegal_root(
-                node_with_illegal_balance_factor)
-
-        return sum
+        return self.fix_tree(node_to_fix_from)
 
     """returns an array representing dictionary 
 
@@ -435,8 +472,17 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 
+    def avl_to_array_rec(self, node: AVLNode, array):
+        if AVLNode.is_empty_node(node):
+            return
+        self.avl_to_array_rec(node.get_left(), array)
+        array.append((node.get_key(), node.get_value()))
+        self.avl_to_array_rec(node.get_right(), array)
+
     def avl_to_array(self):
-        return None
+        array = []
+        self.avl_to_array_rec(self.root, array)
+        return array
 
     """returns the number of items in dictionary 
 
@@ -458,8 +504,35 @@ class AVLTree(object):
 	dictionary larger than node.key.
 	"""
 
-    def split(self, node):
-        return None
+    def join_tree_with_array_of_node_tuples(self, array_of_node_tuples):
+        for mid_node, other_node in array_of_node_tuples:
+            other_tree = self.create_tree(other_node)
+            self.join(other_tree, mid_node.get_key(), mid_node.get_value())
+
+    def split(self, node: AVLNode):
+        greater_array_of_node_tuples = []
+        lower_array_of_node_tuples = []
+        greater_than_node_basis = node.get_right()
+        greater_than_tree_basis = self.create_tree(greater_than_node_basis)
+        lower_than_node_basis = node.get_left()
+        lower_than_tree_basis = self.create_tree(lower_than_node_basis)
+        parent = node.get_parent()
+
+        while parent != None:
+            if not node.is_left_child_of_parent():
+                lower_array_of_node_tuples.append((parent, parent.get_left()))
+            else:
+                greater_array_of_node_tuples.append(
+                    (parent, parent.get_right()))
+            node = parent
+            parent = parent.get_parent()
+
+        lower_than_tree_basis.join_tree_with_array_of_node_tuples(
+            lower_array_of_node_tuples)
+        greater_than_tree_basis.join_tree_with_array_of_node_tuples(
+            greater_array_of_node_tuples)
+
+        return [lower_than_tree_basis, greater_than_tree_basis]
 
     """joins self with key and another AVLTree
 
@@ -475,8 +548,81 @@ class AVLTree(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 
+    def create_tree(self, root):
+        tree = AVLTree()
+        tree.set_root(root)
+        return tree
+
+    def join_trees_with_equal_heights(self, t1, t2, x):
+        x.set_left(t1.root)
+        x.set_right(t2.root)
+        self.root = x
+
+    def join_trees_left_tree_is_smaller(self, t1, t2, x):
+        t2_node = t2.root
+
+        while t2_node.get_height() > t1.root.get_height():
+            t2_node = t2_node.get_left()
+
+        b = t2_node
+        b_parent = b.get_parent()
+
+        x.set_left(t1.root)
+        x.set_right(b)
+        b_parent.set_left(x)
+
+        t2.fix_tree(x)
+
+        self.root = t2.root
+
+    def join_trees_right_tree_is_smaller(self, t1, t2, x):
+        t1_node = t1.root
+
+        while t1_node.get_height() > t2.root.get_height():
+            t1_node = t1_node.get_right()
+
+        b = t1_node
+        b_parent = b.get_parent()
+
+        x.set_left(b)
+        x.set_right(t2.root)
+        b_parent.set_right(x)
+
+        t1.fix_tree(x)
+
+        self.root = t1.root
+
     def join(self, tree, key, val):
-        return None
+        if self.root.is_real_node():
+            if self.root.get_key() < key:
+                t1 = self
+                t2 = tree
+            else:
+                t1 = tree
+                t2 = self
+        else:
+            if tree.root.get_key() > key:
+                t1 = self
+                t2 = tree
+            else:
+                t1 = tree
+                t2 = self
+
+        t1_height = t1.root.get_height()
+        t2_height = t2.root.get_height()
+        height_delta = abs(t1_height - t2_height) + 1
+        x = AVLNode.create_leaf_with_virtual_nodes(key, val)
+
+        if t1_height == t2_height:
+            self.join_trees_with_equal_heights(t1, t2, x)
+            return height_delta
+
+        if t1_height < t2_height:
+            self.join_trees_left_tree_is_smaller(t1, t2, x)
+            return height_delta
+
+        self.join_trees_right_tree_is_smaller(t1, t2, x)
+        return height_delta
 
     """compute the rank of node in the self
 
@@ -509,4 +655,5 @@ class AVLTree(object):
 	"""
 
     def get_root(self):
-        return None
+        return self.root
+
