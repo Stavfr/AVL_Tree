@@ -753,6 +753,7 @@ class AVLTree(object):
     # O(logn)
     def rank(self, node):
         current_node: AVLNode = self.root
+<<<<<<< HEAD
         current_rank = 1
 
         while current_node.get_key() != node.get_key():
@@ -765,6 +766,19 @@ class AVLTree(object):
                 current_node = current_node.get_left()
 
         return current_rank + node.get_left().get_size()
+=======
+        current_rank = 0
+
+        while current_node.get_key() != node.get_key():
+            left_node = current_node.get_left()
+            if current_node.get_key() > node.get_key():
+                current_rank = left_node.get_size()
+                current_node = current_node.get_right()
+            else:  # current_node.get_key() < node.get_key()
+                current_node = current_node.get_left()
+
+        return current_rank
+>>>>>>> fcb3b09 (Implemented 'select' and 'rank')
 
     """finds the i'th smallest item (according to keys) in self
 
@@ -778,6 +792,7 @@ class AVLTree(object):
     # O(logn)
     def select(self, i):
         current_node: AVLNode = self.root
+<<<<<<< HEAD
         current_rank = 1
 
         while current_rank <= i:
@@ -790,6 +805,18 @@ class AVLTree(object):
                 current_node = left_node
             else:  # current_rank + left_node.get_size() < i
                 current_rank = total_rank + 1
+=======
+        current_rank = 0
+
+        while current_rank <= i:
+            if current_rank == i:
+                return current_node
+            left_node = current_node.get_left()
+            if current_rank + left_node.get_size() > i:
+                current_node = left_node
+            else:  # current_rank + left_node.get_size() < i
+                current_rank += left_node.get_size()
+>>>>>>> fcb3b09 (Implemented 'select' and 'rank')
                 current_node = current_node.get_right()
 
     """returns the root of the tree representing the dictionary
