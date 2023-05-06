@@ -305,6 +305,43 @@ def test_split():
     print('------------------------------------')
 
 
+def test_select():
+    tree = AVLTree()
+    tree.insert(12, 0)
+    tree.insert(8, 0)
+    tree.insert(15, 0)
+    tree.insert(6, 0)
+    tree.insert(10, 0)
+    tree.insert(14, 0)
+    tree.insert(24, 0)
+    tree.insert(11, 0)
+    tree.insert(13, 0)
+    tree.insert(20, 0)
+    tree.insert(29, 0)
+    tree.insert(19, 0)
+    node = tree.select(10)
+    print(node)
+
+
+def test_rank():
+    tree = AVLTree()
+    tree.insert(12, 0)
+    tree.insert(8, 0)
+    tree.insert(15, 0)
+    tree.insert(6, 0)
+    tree.insert(10, 0)
+    tree.insert(14, 0)
+    tree.insert(24, 0)
+    tree.insert(11, 0)
+    tree.insert(13, 0)
+    tree.insert(20, 0)
+    tree.insert(29, 0)
+    tree.insert(19, 0)
+    node = tree.select(12)
+    rank = tree.rank(node)
+    print(rank)
+
+
 # test_rotate_right_insert()
 # test_rotate_left_insert()
 # test_rotate_left_right_insert()
@@ -319,4 +356,6 @@ def test_split():
 # test_join_equal_heights_trees()
 # test_join_left_tree_is_taller_by_1()
 # test_join_right_tree_is_taller_by_1()
-test_split()
+# test_split()
+# test_select()
+test_rank()
