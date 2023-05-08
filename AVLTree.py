@@ -404,6 +404,7 @@ class AVLTree(object):
 
         illegal_balance_factor = illegal_root.compute_balance_factor()
 
+        # Rotate according to the balance factor, as seen in the lecture
         if illegal_balance_factor == -2:
             right_child_balance_factor = illegal_root.get_right().compute_balance_factor()
             if right_child_balance_factor in [-1, 0]:
@@ -426,6 +427,7 @@ class AVLTree(object):
         # When called 'node_with_illegal_balance_factor' is not necessarily illegal but it helps us for iterating using while
         sum = 0
 
+        # Fix the tree from the given node up to the root
         while node_with_illegal_balance_factor != None:
             node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
                 node_with_illegal_balance_factor)
@@ -554,6 +556,7 @@ class AVLTree(object):
         lower_than_tree_basis = self.create_tree(lower_than_node_basis)
         parent = node.get_parent()
 
+        # Create tuples with connecting node and trees to connect, as seen in the lecture
         while parent != None:
             if not node.is_left_child_of_parent():
                 lower_array_of_node_tuples.append((parent, parent.get_left()))
@@ -592,6 +595,8 @@ class AVLTree(object):
 
     # O(logn)
     def join(self, tree, key, val):
+
+        # Find the tree with the lower values (t1) and the tree with the higher values (t2)
         if self.root.is_real_node():
             if self.root.get_key() < key:
                 t1 = self
@@ -640,12 +645,14 @@ class AVLTree(object):
     def join_trees_left_tree_is_smaller(self, t1, t2, x):
         t2_node = t2.root
 
+        # Find a node with height h or h-1 on left-most node trail of t2
         while t2_node.get_height() > t1.root.get_height():
             t2_node = t2_node.get_left()
 
         b = t2_node
         b_parent = b.get_parent()
 
+        # "Physical" join of the trees as seen in the lecture
         x.set_left(t1.root)
         x.set_right(b)
         b_parent.set_left(x)
@@ -658,12 +665,14 @@ class AVLTree(object):
     def join_trees_right_tree_is_smaller(self, t1, t2, x):
         t1_node = t1.root
 
+        # Find a node with height h or h-1 on right-most node trail of t1
         while t1_node.get_height() > t2.root.get_height():
             t1_node = t1_node.get_right()
 
         b = t1_node
         b_parent = b.get_parent()
 
+        # "Physical" join of the trees as seen in the lecture
         x.set_left(b)
         x.set_right(t2.root)
         b_parent.set_right(x)
@@ -686,6 +695,7 @@ class AVLTree(object):
         current_node: AVLNode = self.root
         current_rank = 1
 
+        # Find the node using regular search, calculate the rank on the way
         while current_node.get_key() != node.get_key():
             left_node = current_node.get_left()
 
@@ -711,6 +721,8 @@ class AVLTree(object):
         current_node: AVLNode = self.root
         current_rank = 1
 
+        # Calculate the rank of the current node,
+        # then continue left if it is too large or right if it is too small
         while current_rank <= i:
             left_node = current_node.get_left()
             total_rank = current_rank + left_node.get_size()
