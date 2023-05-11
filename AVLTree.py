@@ -276,6 +276,7 @@ class AVLTree(object):
     def __init__(self):
         self.root = None
         # add your fields here
+        self.max = None
 
     # O(1)
     def set_root(self, node):
@@ -365,6 +366,9 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 
+    def set_max(self, node):
+        self.max = node
+
     # O(logn)
     def insert(self, key, val):
         leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
@@ -376,6 +380,24 @@ class AVLTree(object):
         parent_of_leaf = self.physical_insert(leaf_for_insert)
 
         return self.fix_tree(parent_of_leaf)
+
+    def insert_theoretical_question_1(self, key, val):
+        leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
+
+        if self.root == None:
+            self.set_root(leaf_for_insert)
+            self.max = leaf_for_insert
+            return 0
+
+        parent_of_leaf, steps_counter = self.physical_insert_theoretical_question_1(
+            leaf_for_insert)
+
+        if self.max.key < key:
+            self.max = leaf_for_insert
+
+        rotations_counter = self.fix_tree(parent_of_leaf)
+
+        return rotations_counter, steps_counter, rotations_counter + steps_counter
 
     # O(logn)
     def find_parent_for_insert(self, key):
@@ -390,6 +412,40 @@ class AVLTree(object):
                 root = root.get_left()
 
         return root.get_parent()
+
+    # O(logn)
+    def find_parent_for_insert_theoretical_question_1_from_root(self, root, key, steps_counter):
+        while root.is_real_node():
+            root_key = root.get_key()
+
+            if root_key < key:
+                root = root.get_right()
+            if root_key > key:
+                root = root.get_left()
+
+            steps_counter += 1
+
+        steps_counter -= 1
+        return root.get_parent(), steps_counter
+
+    def find_parent_for_insert_theoretical_question_1(self, key):
+        current_node: AVLNode = self.max
+        current_key = current_node.get_key()
+        steps_counter = 0
+
+        while current_node.get_parent() is not None and current_key > key:
+            current_node = current_node.get_parent()
+            current_key = current_node.get_key()
+            steps_counter += 1
+
+        if current_key < key:
+            steps_counter -= 1
+            current_node = current_node.get_right()
+
+        parent_for_insertion, steps_counter = self.find_parent_for_insert_theoretical_question_1_from_root(
+            current_node, key, steps_counter)
+
+        return parent_for_insertion, steps_counter
 
     # O(logn)
     def find_parent_with_illegal_balance_factor(self, node: AVLNode):
@@ -447,6 +503,19 @@ class AVLTree(object):
             parent_for_insert.set_right(leaf_for_insert)
 
         return parent_for_insert
+
+    def physical_insert_theoretical_question_1(self, leaf_for_insert: AVLNode):
+        key = leaf_for_insert.get_key()
+        parent_for_insert, steps_counter = self.find_parent_for_insert_theoretical_question_1(
+            key)
+        parent_for_insert_key = parent_for_insert.get_key()
+
+        if parent_for_insert_key > key:
+            parent_for_insert.set_left(leaf_for_insert)
+        if parent_for_insert_key < key:
+            parent_for_insert.set_right(leaf_for_insert)
+
+        return parent_for_insert, steps_counter
 
     """deletes node from the dictionary
 
