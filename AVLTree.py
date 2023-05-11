@@ -463,7 +463,7 @@ class AVLTree(object):
         if self.root == None:
             self.set_root(leaf_for_insert)
             self.max = leaf_for_insert
-            return 0
+            return 0, 0, 0
 
         parent_of_leaf, steps_counter = self.physical_insert_theoretical_question_1(
             leaf_for_insert)
