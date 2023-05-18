@@ -595,8 +595,10 @@ class AVLTree(object):
 
     # O(logn)
     def join(self, tree, key, val):
-
         # Find the tree with the lower values (t1) and the tree with the higher values (t2)
+        if not self.root.is_real_node() and not tree.root.is_real_node():
+            self.set_root(AVLNode.create_leaf_with_virtual_nodes(key, val))
+            return 1
         if self.root.is_real_node():
             if self.root.get_key() < key:
                 t1 = self
