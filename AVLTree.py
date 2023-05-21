@@ -4,7 +4,6 @@
 # id2      - complete info
 # name2    - complete info
 
-
 """A class represnting a node in an AVL tree"""
 
 
@@ -28,8 +27,8 @@ class AVLNode(object):
 
     def create_leaf_with_virtual_nodes(key, value):
         leaf = AVLNode(key, value)
-        leaf.height(0)
-        leaf.size(1)
+        leaf.height = 0
+        leaf.size = 1
         leaf.left = AVLNode(None, None)
         leaf.left.parent = leaf
         leaf.right = AVLNode(None, None)
@@ -89,8 +88,8 @@ class AVLNode(object):
         right_child = self.right
         left_child = self.left
 
-        is_right_child_empty = self.is_empty_node(right_child)
-        is_left_child_empty = self.is_empty_node(left_child)
+        is_right_child_empty = AVLNode.is_empty_node(right_child)
+        is_left_child_empty = AVLNode.is_empty_node(left_child)
 
         return is_right_child_empty and is_left_child_empty
 
@@ -105,8 +104,8 @@ class AVLNode(object):
         right_child = self.right
         left_child = self.left
 
-        is_right_child_empty = self.is_empty_node(right_child)
-        is_left_child_empty = self.is_empty_node(left_child)
+        is_right_child_empty = AVLNode.is_empty_node(right_child)
+        is_left_child_empty = AVLNode.is_empty_node(left_child)
 
         return (is_right_child_empty and (not is_left_child_empty)) or \
             (is_left_child_empty and (not is_right_child_empty))
@@ -408,7 +407,7 @@ class AVLTree(object):
 
     def find_successor_for_node_with_two_childs(self, node: AVLNode):
         successor_contestant: AVLNode = node.get_right()
-        while not successor_contestant.is_empty_node(successor_contestant):
+        while not AVLNode.is_empty_node(successor_contestant):
             successor_contestant = successor_contestant.get_left()
         return successor_contestant.get_parent()
 
@@ -456,7 +455,7 @@ class AVLTree(object):
     def insert(self, key, val):
         leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
 
-        if self.root == None:
+        if AVLNode.is_empty_node(self.root):
             self.set_root(leaf_for_insert)
             return 0
 
@@ -630,6 +629,10 @@ class AVLTree(object):
             node_to_fix_from = self.physical_delete(successor)
             self.replace_node_in_tree(node, successor)
 
+            # In case we deleted the node we are trying to fix from
+            if node is node_to_fix_from:
+                node_to_fix_from = successor
+
         return self.fix_tree(node_to_fix_from)
 
     """Physically deletes a node from the AVL tree by adjusting the tree structure.
@@ -694,7 +697,9 @@ class AVLTree(object):
         old_node_parent = old_node.get_parent()
         new_node.set_left(old_node.get_left())
         new_node.set_right(old_node.get_right())
-        old_node_parent.update_parents_child(old_node, new_node)
+        
+        if old_node_parent!= None:
+            old_node_parent.update_parents_child(old_node, new_node)
 
     """returns an array representing dictionary 
 
@@ -803,10 +808,13 @@ class AVLTree(object):
     # O(logn)
     def join(self, tree, key, val):
         # Find the tree with the lower values (t1) and the tree with the higher values (t2)
-        if not self.root.is_real_node() and not tree.root.is_real_node():
+        if AVLNode.is_empty_node(self.root) and AVLNode.is_empty_node(tree.root):
             self.set_root(AVLNode.create_leaf_with_virtual_nodes(key, val))
             return 1
-        if self.root.is_real_node():
+        
+        if not AVLNode.is_empty_node(self.root):
+            if tree.root == None:
+                tree.root = AVLNode(None, None)
             if self.root.get_key() < key:
                 t1 = self
                 t2 = tree
@@ -814,6 +822,8 @@ class AVLTree(object):
                 t1 = tree
                 t2 = self
         else:
+            if self.root == None:
+                self.root = AVLNode(None, None)
             if tree.root.get_key() > key:
                 t1 = self
                 t2 = tree
@@ -953,3 +963,4 @@ class AVLTree(object):
     # O(1)
     def get_root(self):
         return self.root
+    
