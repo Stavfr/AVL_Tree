@@ -16,7 +16,6 @@ class AVLNode(object):
     @type value: any
     @param value: data of your node
     """
-    # O(1)
 
     def __init__(self, key, value):
         self.key = key
@@ -27,11 +26,10 @@ class AVLNode(object):
         self.height = -1
         self.size = 0
 
-    # O(1)
     def create_leaf_with_virtual_nodes(key, value):
         leaf = AVLNode(key, value)
-        leaf.set_height(0)
-        leaf.set_size(1)
+        leaf.height(0)
+        leaf.size(1)
         leaf.left = AVLNode(None, None)
         leaf.left.parent = leaf
         leaf.right = AVLNode(None, None)
@@ -39,42 +37,73 @@ class AVLNode(object):
 
         return leaf
 
-    # O(1)
+    def compute_size_and_update_property(self):
+        right_child_size = self.right.size
+        left_child_size = self.left.size
+
+        self.size = right_child_size + left_child_size + 1
+
+    """
+    Computes the balance factor of the node.
+
+    This method calculates the balance factor of the node also updates the height and size properties of the node.
+    
+    Returns:
+    - balance_factor (int): The balance factor of the node.
+    """
+
     def compute_balance_factor(self):
         if self == None or (not self.is_real_node()):
             return 0
 
-        right_child_height = self.get_right().get_height()
-        left_child_height = self.get_left().get_height()
+        right_child_height = self.right.height
+        left_child_height = self.left.height
         balance_factor = left_child_height - right_child_height
 
         self.height = max(right_child_height, left_child_height) + 1
 
-        right_child_size = self.get_right().get_size()
-        left_child_size = self.get_left().get_size()
-
-        self.size = right_child_size + left_child_size + 1
+        self.compute_size_and_update_property()
 
         return balance_factor
 
-    # O(1)
+    """
+    Checks if a node is empty.
+
+    Parameters:
+        node: A node in the tree.
+
+    Returns:
+        bool: True if the node is empty, False otherwise.
+    """
     def is_empty_node(node):
         return node == None or (not node.is_real_node())
 
-    # O(1)
+    """
+    Checks if the node is a leaf node (a node with 2 'virtual node' childs is considered a leaf as well).
+
+    Returns:
+        bool: True if the node is a leaf node, False otherwise.
+    """
+
     def is_leaf(self):
-        right_child = self.get_right()
-        left_child = self.get_left()
+        right_child = self.right
+        left_child = self.left
 
         is_right_child_empty = self.is_empty_node(right_child)
         is_left_child_empty = self.is_empty_node(left_child)
 
         return is_right_child_empty and is_left_child_empty
 
-    # O(1)
+    """
+    Checks whether the node has exactly one child.
+    
+    Returns:
+        bool: True if the node has exactly one child, False otherwise.
+    """
+
     def has_one_child(self):
-        right_child = self.get_right()
-        left_child = self.get_left()
+        right_child = self.right
+        left_child = self.left
 
         is_right_child_empty = self.is_empty_node(right_child)
         is_left_child_empty = self.is_empty_node(left_child)
@@ -82,14 +111,26 @@ class AVLNode(object):
         return (is_right_child_empty and (not is_left_child_empty)) or \
             (is_left_child_empty and (not is_right_child_empty))
 
-    # O(1)
-    def is_left_child_of_parent(node):
-        parent = node.get_parent()
-        return parent.get_left() == node
+    """
+    Checks whether the given node is the left child of its parent.
+    Returns:
+        bool: True if the node is the left child of its parent, False otherwise.
+    """
 
-    # O(1)
+    def is_left_child_of_parent(self):
+        parent = self.parent
+        return parent.left == self
+
+    """
+    Updates the parent's child node reference with a new child node.
+
+    Parameters:
+        old_child: The old child node to be replaced.
+        new_child: The new child node to replace the old child.
+    """
+
     def update_parents_child(self, old_child, new_child):
-        if AVLNode.is_left_child_of_parent(old_child):
+        if old_child.is_left_child_of_parent():
             self.set_left(new_child)
         else:
             self.set_right(new_child)
@@ -100,7 +141,6 @@ class AVLNode(object):
 	@returns: the key of self, None if the node is virtual
 	"""
 
-    # O(1)
     def get_key(self):
         return self.key
 
@@ -110,7 +150,6 @@ class AVLNode(object):
 	@returns: the value of self, None if the node is virtual
 	"""
 
-    # O(1)
     def get_value(self):
         return self.value
 
@@ -119,7 +158,6 @@ class AVLNode(object):
 	@returns: the left child of self, None if there is no left child (if self is virtual)
 	"""
 
-    # O(1)
     def get_left(self):
         return self.left
 
@@ -129,7 +167,6 @@ class AVLNode(object):
 	@returns: the right child of self, None if there is no right child (if self is virtual)
 	"""
 
-    # O(1)
     def get_right(self):
         return self.right
 
@@ -139,7 +176,6 @@ class AVLNode(object):
 	@returns: the parent of self, None if there is no parent
 	"""
 
-    # O(1)
     def get_parent(self):
         return self.parent
 
@@ -149,7 +185,6 @@ class AVLNode(object):
 	@returns: the height of self, -1 if the node is virtual
 	"""
 
-    # O(1)
     def get_height(self):
         return self.height
 
@@ -159,7 +194,6 @@ class AVLNode(object):
 	@returns: the size of the subtree of self, 0 if the node is virtual
 	"""
 
-    # O(1)
     def get_size(self):
         return self.size
 
@@ -169,7 +203,6 @@ class AVLNode(object):
 	@param key: key
 	"""
 
-    # O(1)
     def set_key(self, key):
         self.key = key
 
@@ -179,39 +212,37 @@ class AVLNode(object):
 	@param value: data
 	"""
 
-    # O(1)
     def set_value(self, value):
         self.value = value
 
-    """sets left child
+    """sets left child and updates it's parent to be the new one
 
 	@type node: AVLNode
 	@param node: a node
 	"""
 
-    # O(1)
     def set_left(self, node):
         self.left = node
         node.set_parent(self)
 
-    """sets right child
+    """sets right child and updates it's parent to be the new one
 
 	@type node: AVLNode
 	@param node: a node
 	"""
 
-    # O(1)
     def set_right(self, node):
         self.right = node
         node.set_parent(self)
 
-    """sets parent
+    """sets parent.
+    Additionally, the method updates the height and size properties
+    of the new parent node based on the heights and sizes of its left and right child nodes.
 
 	@type node: AVLNode
 	@param node: a node
 	"""
 
-    # O(1)
     def set_parent(self, node):
         if node == None:
             self.parent = None
@@ -222,11 +253,10 @@ class AVLNode(object):
             parent_left = new_parent.left
             parent_right = new_parent.right
 
-            new_height = max(parent_left.get_height(),
-                             parent_right.get_height()) + 1
+            new_height = max(parent_left.height, parent_right.height) + 1
             new_parent.set_height(new_height)
 
-            new_size = parent_left.get_size() + parent_right.get_size() + 1
+            new_size = parent_left.size + parent_right.size + 1
             new_parent.set_size(new_size)
 
     """sets the height of the node
@@ -235,7 +265,6 @@ class AVLNode(object):
 	@param h: the height
 	"""
 
-    # O(1)
     def set_height(self, h):
         self.height = h
 
@@ -245,7 +274,6 @@ class AVLNode(object):
 	@param s: the size
 	"""
 
-    # O(1)
     def set_size(self, s):
         self.size = s
 
@@ -255,7 +283,6 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 
-    # O(1)
     def is_real_node(self):
         return not self.key == None
 
@@ -272,17 +299,30 @@ class AVLTree(object):
 
     """
 
-    # O(1)
     def __init__(self):
         self.root = None
-        # add your fields here
 
-    # O(1)
+    """Sets the root node of the AVL tree.
+
+    Parameters:
+        node: The node to be set as the root.
+    """
+
     def set_root(self, node):
         self.root = node
         node.set_parent(None)
 
-    # O(1)
+    """Performs a right rotation on the given `old_root` node in the AVL tree.
+    The right rotation promotes 'new_root' (the left child of `old_root`) in 'old_root''s place,
+    while `old_root` becomes the right child of the new root.
+    
+    Args:
+        old_root (AVLNode): The node to perform the right rotation on.
+
+    Complexity:
+        The rotation operation takes constant time O(1).
+    """
+
     def rotate_right(self, old_root: AVLNode):
         new_root: AVLNode = old_root.get_left()
         new_root_right = new_root.get_right()
@@ -296,7 +336,17 @@ class AVLTree(object):
         old_root.set_left(new_root_right)
         new_root.set_right(old_root)
 
-    # O(1)
+    """Performs a left rotation on the given `old_root` node in the AVL tree.
+    The left rotation promotes 'new_root' (the right child of `old_root`) in 'old_root''s place,
+    while `old_root` becomes the left child of the new root.
+    
+    Args:
+        old_root (AVLNode): The node to perform the left rotation on.
+
+    Complexity:
+        The rotation operation takes constant time O(1).
+    """
+
     def rotate_left(self, old_root: AVLNode):
         new_root: AVLNode = old_root.get_right()
         new_root_left = new_root.get_left()
@@ -310,21 +360,52 @@ class AVLTree(object):
         old_root.set_right(new_root_left)
         new_root.set_left(old_root)
 
-    # O(1)
-    def rotate_left_then_right(self, old_root: AVLNode):
-        # Stands for A in the presentation
-        left_old_new_root: AVLNode = old_root.get_left()
+    """Performs a left_rotation on 'old_root's left child and then a right rotation on 'old_root'.
+    
+    Args:
+        old_root (AVLNode): The root of the subtree to perform the rotations on.
 
-        self.rotate_left(left_old_new_root)
+    Complexity:
+        The rotation operation takes constant time O(1).
+    """
+
+    def rotate_left_then_right(self, old_root: AVLNode):
+        old_root_left_child: AVLNode = old_root.get_left()
+
+        self.rotate_left(old_root_left_child)
         self.rotate_right(old_root)
 
-    # O(1)
+    """Performs a right rotation on 'old_root's right child and then a left rotation on 'old_root'.
+    
+    Args:
+        old_root (AVLNode): The root of the subtree to perform the rotations on.
+
+    Complexity:
+        The rotation operation takes constant time O(1).
+    """
+
     def rotate_right_then_left(self, old_root: AVLNode):
-        right_old_new_root: AVLNode = old_root.get_right()
-        self.rotate_right(right_old_new_root)
+        old_root_right_child: AVLNode = old_root.get_right()
+        self.rotate_right(old_root_right_child)
         self.rotate_left(old_root)
 
-    # O(logn)
+    """Finds the successor node for a given `node` in the AVL tree when the node has two children.
+
+    The algorithm starts by moving to the right child of the given `node`, and then iteratively
+    moves to the left child of each subsequent node until it reaches the leftmost descendant of
+    the right child (which will be the successor node). It returns the parent of this successor node.
+
+    Args:
+        node (AVLNode): The node for which to find the successor.
+
+    Returns:
+        AVLNode: The parent node of the successor node.
+
+    Complexity:
+        The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
+        in the AVL tree.
+    """
+
     def find_successor_for_node_with_two_childs(self, node: AVLNode):
         successor_contestant: AVLNode = node.get_right()
         while not successor_contestant.is_empty_node(successor_contestant):
@@ -337,9 +418,12 @@ class AVLTree(object):
 	@param key: a key to be searched
 	@rtype: any
 	@returns: the value corresponding to key.
+    
+    Complexity: 
+        The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
+        in the AVL tree. 
 	"""
 
-    # O(logn)
     def search(self, key):
         root = self.root
 
@@ -363,9 +447,12 @@ class AVLTree(object):
 	@param val: the value of the item
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
+
+    Complexity: 
+        The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
+        in the AVL tree. 
 	"""
 
-    # O(logn)
     def insert(self, key, val):
         leaf_for_insert = AVLNode.create_leaf_with_virtual_nodes(key, val)
 
@@ -377,7 +464,20 @@ class AVLTree(object):
 
         return self.fix_tree(parent_of_leaf)
 
-    # O(logn)
+    """Finds the parent node where a new node with the given key should be inserted.
+
+    Args:
+        key: The key of the new node to be inserted.
+
+    Returns:
+        AVLNode: The parent node where the new node should be inserted.
+
+    Complexity:
+        The time complexity of finding the parent for insertion is O(logn) in the worst case,
+        where 'n' is the number of nodes in the tree.
+
+    """
+
     def find_parent_for_insert(self, key):
         root: AVLNode = self.root
 
@@ -391,13 +491,45 @@ class AVLTree(object):
 
         return root.get_parent()
 
-    # O(logn)
+    """Finds the parent node that has an illegal balance factor in its subtree.
+
+    Starting from the given node, the function traverses up the tree towards the root,
+    searching for the first node that has an absolute balance factor greater than 1.
+    It stops the traversal if it reaches the root or encounters a node with a legal balance factor.
+
+    Args:
+        node (AVLNode): The starting node for the search.
+
+    Returns:
+        AVLNode: The parent node with an illegal balance factor, or None if no such node is found.
+
+    Complexity:
+        The time complexity of finding the parent with an illegal balance factor is O(logn) in the worst case,
+        where 'n' is the number of nodes in the tree.
+
+    """
+
     def find_parent_with_illegal_balance_factor(self, node: AVLNode):
         while node != None and abs(node.compute_balance_factor()) <= 1:
             node = node.get_parent()
         return node
 
-    # O(1)
+    """Fixes the subtree rooted at the given illegal root node.
+
+    The function performs necessary rotationsto restore the balance of the subtree rooted at the illegal root node.
+    It determines the rotations needed based on the balance factor of the illegal root and its child nodes.
+
+    Args:
+        illegal_root (AVLNode): The illegal root node with an imbalance in its subtree.
+
+    Returns:
+        int: The number of rotations made during the fix.
+
+    Complexity:
+        The time complexity of fixing the subtree is O(1).
+
+    """
+
     def fix_tree_of_illegal_root(self, illegal_root):
         if illegal_root == None:
             return 0
@@ -422,22 +554,48 @@ class AVLTree(object):
                 self.rotate_left_then_right(illegal_root)
                 return 2
 
-    # O(logn)
-    def fix_tree(self, node_with_illegal_balance_factor):
-        # When called 'node_with_illegal_balance_factor' is not necessarily illegal but it helps us for iterating using while
+    """Fixes the AVL tree up to the root starting from the given node.
+
+    The function iteratively fixes the tree from the given node up to the root by identifying and resolving nodes with illegal balance factors.
+
+    Args:
+        node (AVLNode): The node to fix the tree from.
+
+    Returns:
+        int: The sum of the rotations made to fix the tree.
+
+    Complexity:
+        The time complexity of fixing the tree is O(log n), where n is the number of nodes in the AVL tree.
+    """
+
+    def fix_tree(self, node):
         sum = 0
 
         # Fix the tree from the given node up to the root
-        while node_with_illegal_balance_factor != None:
-            node_with_illegal_balance_factor = self.find_parent_with_illegal_balance_factor(
-                node_with_illegal_balance_factor)
-
-            sum += self.fix_tree_of_illegal_root(
-                node_with_illegal_balance_factor)
+        while node != None:
+            node = self.find_parent_with_illegal_balance_factor(node)
+            sum += self.fix_tree_of_illegal_root(node)
 
         return sum
 
-    # O(logn)
+    """
+    Inserts a new leaf node into the AVL tree.
+
+    The function determines the appropriate parent node for insertion based on the key value of the leaf node.
+
+    Args:
+        leaf_for_insert (AVLNode): The leaf node to be inserted into the AVL tree.
+
+    Returns:
+        AVLNode: The parent node where the leaf node is inserted.
+
+    Note:
+        This function assumes that the leaf node is not already present in the tree.
+
+    Complexity:
+        The time complexity of the physical insertion operation is O(log n), where n is the number of nodes in the AVL tree.
+    """
+
     def physical_insert(self, leaf_for_insert: AVLNode):
         key = leaf_for_insert.get_key()
         parent_for_insert = self.find_parent_for_insert(key)
@@ -456,9 +614,12 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
+
+    Complexity:
+        The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
+        in the AVL tree. 
 	"""
 
-    # O(logn)
     def delete(self, node: AVLNode):
         node_to_fix_from = None
 
@@ -471,7 +632,24 @@ class AVLTree(object):
 
         return self.fix_tree(node_to_fix_from)
 
-    # O(1)
+    """Physically deletes a node from the AVL tree by adjusting the tree structure.
+
+    The function handles the physical deletion of a node based on its type:
+    - If the node is a leaf or has one child, its child is assigned as the new child of its parent.
+    - If the node is the root, one of it's children become the new root with preference to the left child
+      (if the node is a leaf as well then the new root will point to None).
+
+    Args:
+        node (AVLNode): The node to be physically deleted.
+
+    Returns:
+        AVLNode: The parent node from which tree balancing should start.
+
+    Complexity:
+        The time complexity of physical deletion is O(1).
+
+    """
+
     def physical_delete(self, node: AVLNode):
         child = None
         left_child = node.get_left()
@@ -480,7 +658,7 @@ class AVLTree(object):
         else:
             child = node.get_right()
 
-        node_parent = node.parent
+        node_parent = node.get_parent()
         if node_parent == None:
             if child.is_real_node():
                 self.set_root(child)
@@ -495,7 +673,20 @@ class AVLTree(object):
 
         return node_parent
 
-    # O(1)
+    """Replaces a node in the AVL tree with a new node.
+
+    The function replaces the old node with the new node while preserving the old node's left and right children.
+    If the old node is the root, the new node becomes the root.
+   
+    Args:
+        old_node (AVLNode): The node to be replaced.
+        new_node (AVLNode): The new node to replace the old node.
+
+    Complexity:
+        The time complexity of replacing a node in the tree is O(1).
+
+    """
+
     def replace_node_in_tree(self, old_node: AVLNode, new_node: AVLNode):
         if self.root == old_node:
             self.set_root(new_node)
@@ -509,16 +700,33 @@ class AVLTree(object):
 
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
+
+    Complexity:
+        The operation has a time complexity of O(n) in the worst case, where n is the number of nodes
+        in the AVL tree. 
+
 	"""
 
-    # O(n)
     def avl_to_array(self):
         array = []
         self.avl_to_array_rec(self.root, array)
         return array
 
-    # O(n)
-    def avl_to_array_rec(self, node: AVLNode, array):
+    """
+    Recursively converts an AVL tree into an array representation.
+
+    The function traverses the AVL tree in an in-order fashion (left-subtree, root, right-subtree)
+    and appends each node's key-value pair to the provided array.
+
+    Args:
+        node (AVLNode): The current node being processed.
+        array (list): The array to store the key-value pairs of the AVL tree.
+
+    Complexity:
+        The time complexity of this function is O(n), where 'n' is the number of nodes in the AVL tree.
+    """
+
+    def avl_to_array_rec(self, node, array):
         if AVLNode.is_empty_node(node):
             return
         self.avl_to_array_rec(node.get_left(), array)
@@ -531,7 +739,6 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 
-    # O(1)
     def size(self):
         return self.get_root().get_size()
 
