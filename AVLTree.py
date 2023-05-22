@@ -33,6 +33,8 @@ class AVLNode(object):
         @param key: key of your node
         @type value: any
         @param value: data of your node
+        @rtype: AVLNode
+        @returns: The leaf node created
         """
         leaf = AVLNode(key, value)
         leaf.height = 0
@@ -152,7 +154,7 @@ class AVLNode(object):
     def get_left(self):
         """Returns the left child
 
-        @rtype: AVLNode
+        @rtype: AVLNode or None
         @returns: the left child of self, None if there is no left child (if self is virtual)
         """
         return self.left
@@ -160,7 +162,7 @@ class AVLNode(object):
     def get_right(self):
         """Returns the right child
 
-        @rtype: AVLNode
+        @rtype: AVLNode or None
         @returns: the right child of self, None if there is no right child (if self is virtual)
         """
         return self.right
@@ -168,7 +170,7 @@ class AVLNode(object):
     def get_parent(self):
         """Returns the parent
 
-        @rtype: AVLNode
+        @rtype: AVLNode or None
         @returns: the parent of self, None if there is no parent
         """
         return self.parent
