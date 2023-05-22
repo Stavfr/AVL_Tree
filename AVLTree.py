@@ -355,12 +355,15 @@ class AVLTree(object):
     def find_successor_for_node_with_two_childs(self, node: AVLNode):
         """Finds the successor node for a given `node` in the AVL tree when the node has two children.
 
-        The algorithm starts by moving to the right child of the given `node`, and then iteratively
+        The function starts by moving to the right child of the given `node`, and then iteratively
         moves to the left child of each subsequent node until it reaches the leftmost descendant of
         the right child (which will be the successor node). It returns the parent of this successor node.
 
         @type node: AVLNode
-        @param node: The parent node of the successor node.
+        @pre: node has 2 children (non virtual children).
+        @param node: Node to find a successor of.
+        @rtype: AVLNode
+        @returns: The parent of the successor node.
         @complexity: The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
         in the AVL tree.
         """
@@ -402,7 +405,6 @@ class AVLTree(object):
         @param val: the value of the item
         @rtype: int
         @returns: the number of rebalancing operation due to AVL rebalancing
-
         @complexity: The operation has a time complexity of O(log n) in the worst case, where n is the number of nodes
         in the AVL tree.
         """
@@ -459,10 +461,10 @@ class AVLTree(object):
     def fix_tree_of_illegal_root(self, illegal_root):
         """Fixes the subtree rooted at the given illegal root node.
 
-        The function performs necessary rotationsto restore the balance of the subtree rooted at the illegal root node.
+        The function performs necessary rotations to restore the balance of the subtree rooted at the illegal root node.
         It determines the rotations needed based on the balance factor of the illegal root and its child nodes.
 
-        @type illegal_root: AVLNode
+        @type illegal_root: AVLNode or None
         @param illegal_root: The illegal root node with an imbalance in its subtree.
         @rtype: int
         @returns: The number of rotations made during the fix.
@@ -560,12 +562,13 @@ class AVLTree(object):
         return self.fix_tree(node_to_fix_from)
 
     def physical_delete(self, node: AVLNode):
-        """Physically deletes a node from the AVL tree by adjusting the tree structure.
+        """Physically deletes a node with up to one child (virtual node is not considered a child)
+        from the AVL tree, by adjusting the tree structure.
 
         The function handles the physical deletion of a node based on its type:
-        - If the node is a leaf or has one child, its child is assigned as the new child of its parent.
-        - If the node is the root, one of it's children become the new root with preference to the left child
-        (if the node is a leaf as well then the new root will point to None).
+        - If node is not the root of self, its child is assigned as the new child of its parent.
+        - If node is the root of self, if node has a child, node's child will become the new root. 
+        otherwise, we will point root to None.
 
         @type node: AVLNode
         @param node: node to be physically deleted
@@ -634,7 +637,7 @@ class AVLTree(object):
         The function traverses the AVL tree in an in-order fashion (left-subtree, root, right-subtree)
         and appends each node's key-value pair to the provided array.
 
-        @type node: AVLNode
+        @type node: AVLNode or None
         @param node: The current node being processed.
         @type array: list
         @param array: The array to store the key-value pairs of the AVL tree.
