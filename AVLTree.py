@@ -918,7 +918,7 @@ class AVLTree(object):
     def get_root(self):
         """Returns the root of the tree representing the dictionary
 
-        @rtype: AVLNode or None
+        @rtype: AVLNode
         @returns: the root, None if the dictionary is empty
         """
         return self.root
