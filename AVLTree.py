@@ -894,7 +894,7 @@ class AVLTree(object):
         @type i: int
         @pre: 1 <= i <= self.size()
         @param i: the rank to be selected in self
-        @rtype: int
+        @rtype: AVLNode
         @returns: the item of rank i in self
         @complexity: O(log n), where n is the number of nodes in the AVL tree.
         """
