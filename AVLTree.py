@@ -510,6 +510,7 @@ class AVLTree(object):
         """Fixes the AVL tree up to the root starting from the given node.
 
         The function iteratively fixes the tree from the given node up to the root by identifying and resolving nodes with illegal balance factors.
+        Additionally, the function counts the number of rotations and height fixes needed for fixing the tree.
 
         @type node: AVLNode
         @param node: The node to fix the tree from.
