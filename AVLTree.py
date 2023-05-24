@@ -59,18 +59,24 @@ class AVLNode(object):
         @rtype: int
         @returns: self's balance factor
         """
+        has_height_updated = False
+
         if self == None or (not self.is_real_node()):
-            return 0
+            return 0, has_height_updated
 
         right_child_height = self.right.height
         left_child_height = self.left.height
         balance_factor = left_child_height - right_child_height
 
-        self.height = max(right_child_height, left_child_height) + 1
+        new_height = max(right_child_height, left_child_height) + 1
+
+        if self.height != new_height:
+            self.height = new_height
+            has_height_updated = True
 
         self.compute_size_and_update_property()
 
-        return balance_factor
+        return balance_factor, has_height_updated
 
     def is_empty_node(node):
         """Checks if node is None or 'virtual node'
@@ -454,9 +460,17 @@ class AVLTree(object):
         @complexity: The time complexity of finding the parent with an illegal balance factor is O(logn) in the worst case,
         where 'n' is the number of nodes in the tree.
         """
-        while node != None and abs(node.compute_balance_factor()) <= 1:
+        imblanace_fix_counter = 0
+
+        while node != None:
+            balance_factor, has_height_updated = node.compute_balance_factor()
+            if abs(balance_factor) >= 2:
+                break
+            if has_height_updated:
+                imblanace_fix_counter += 1
             node = node.get_parent()
-        return node
+
+        return node, imblanace_fix_counter
 
     def fix_tree_of_illegal_root(self, illegal_root):
         """Fixes the subtree rooted at the given illegal root node.
@@ -472,11 +486,11 @@ class AVLTree(object):
         if illegal_root == None:
             return 0
 
-        illegal_balance_factor = illegal_root.compute_balance_factor()
+        illegal_balance_factor, _ = illegal_root.compute_balance_factor()
 
         # Rotate according to the balance factor, as seen in the lecture
         if illegal_balance_factor == -2:
-            right_child_balance_factor = illegal_root.get_right().compute_balance_factor()
+            right_child_balance_factor, _ = illegal_root.get_right().compute_balance_factor()
             if right_child_balance_factor in [-1, 0]:
                 self.rotate_left(illegal_root)
                 return 1
@@ -484,7 +498,7 @@ class AVLTree(object):
                 self.rotate_right_then_left(illegal_root)
                 return 2
         else:  # illegal_balance_factor == 2
-            left_child_balance_factor = illegal_root.get_left().compute_balance_factor()
+            left_child_balance_factor, _ = illegal_root.get_left().compute_balance_factor()
             if left_child_balance_factor in [1, 0]:
                 self.rotate_right(illegal_root)
                 return 1
@@ -507,7 +521,9 @@ class AVLTree(object):
 
         # Fix the tree from the given node up to the root
         while node != None:
-            node = self.find_parent_with_illegal_balance_factor(node)
+            node, num_of_imbalance_fixes = self.find_parent_with_illegal_balance_factor(
+                node)
+            sum += num_of_imbalance_fixes
             sum += self.fix_tree_of_illegal_root(node)
 
         return sum
